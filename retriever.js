@@ -461,7 +461,7 @@ function updateServerRuns(runs) {
 function updateDatabase(p) {
 	//console.log("Player: ", p);
 	// update the player record
-	var query = "INSERT INTO `players` (`buid`, `guid`, `name`, `berries`, `motto`, `gap`, `items`, `challenges`, `runs`, `timeplayed`, `epochtime`, `berry`, `vip`, `ip`, `country`, `countrycode`, `city`, `latlong`, `visited`, `easy`, `medium`, `hard`, `insane`, `extreme`, `trial`, `race`, `therun`, `easy_saves_loads`, `easy_epoch`, `easy_splits`, `medium_saves_loads`, `medium_epoch`, `medium_splits`, `hard_saves_loads`, `hard_epoch`, `hard_splits`, `extreme_saves_loads`, `extreme_epoch`, `extreme_splits`, `insane_saves_loads`, `insane_epoch`, `insane_splits`, `trial_epoch`, `trial_splits`, `race_epoch`, `race_splits`, `therun_epoch`, `therun_splits`, `pieces`, `pk_games`, `pk_wins`, `hill_games`, `hill_wins`, `hill_killstreak`, `berry_casino`, `berry_wta_race`, `berry_wta_hill`, `berry_gifted`, `berry_received`, `berry_pk`)" +
+	var query = "INSERT INTO `players` (`buid`, `guid`, `name`, `berries`, `motto`, `gap`, `gap_epoch`, `items`, `challenges`, `runs`, `timeplayed`, `epochtime`, `berry`, `vip`, `ip`, `country`, `countrycode`, `city`, `latlong`, `visited`, `easy`, `medium`, `hard`, `insane`, `extreme`, `trial`, `race`, `therun`, `easy_saves_loads`, `easy_epoch`, `easy_splits`, `medium_saves_loads`, `medium_epoch`, `medium_splits`, `hard_saves_loads`, `hard_epoch`, `hard_splits`, `extreme_saves_loads`, `extreme_epoch`, `extreme_splits`, `insane_saves_loads`, `insane_epoch`, `insane_splits`, `trial_epoch`, `trial_splits`, `race_epoch`, `race_splits`, `therun_epoch`, `therun_splits`, `pieces`, `pk_games`, `pk_wins`, `hill_games`, `hill_wins`, `hill_killstreak`, `hill_killstreak_epoch`, `berry_casino`, `berry_wta_race`, `berry_wta_hill`, `berry_gifted`, `berry_received`, `berry_pk`)" +
 		"VALUES ('" +
 		p.buid + "', '" +
 		p.guid + "', " +
@@ -469,6 +469,7 @@ function updateDatabase(p) {
 		p.berries + "', " +
 		db.escape(p.motto) + ", '" +
 		p.gap + "', '" +
+		p.gap_epoch + "', '" +
 		p.items + "', '" +
 		p.challenges + "', '" +
 		p.runs + "', '" +
@@ -517,6 +518,7 @@ function updateDatabase(p) {
 		p.hill_games + "', '" +
 		p.hill_wins + "', '" +
 		p.hill_killstreak + "', '" +
+		p.hill_killstreak_epoch + "', '" +
 		p.berry_casino + "', '" +
 		p.berry_wta_race + "', '" +
 		p.berry_wta_hill + "', '" +
@@ -529,6 +531,7 @@ function updateDatabase(p) {
 		"berries=VALUES(berries), " +
 		"motto=VALUES(motto), " +
 		"gap=VALUES(gap), " +
+		"gap_epoch=VALUES(gap_epoch), " +
 		"items=VALUES(items), " +
 		"challenges=VALUES(challenges), " +
 		"runs=VALUES(runs), " +
@@ -576,6 +579,7 @@ function updateDatabase(p) {
 		"hill_games=VALUES(hill_games), " +
 		"hill_wins=VALUES(hill_wins), " +
 		"hill_killstreak=VALUES(hill_killstreak), " +
+		"hill_killstreak_epoch=VALUES(hill_killstreak_epoch), " +
 		"berry_casino=VALUES(berry_casino), " +
 		"berry_wta_race=VALUES(berry_wta_race), " +
 		"berry_wta_hill=VALUES(berry_wta_hill), " +
