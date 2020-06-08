@@ -4,6 +4,7 @@ const fs = require('fs');
 const Path = require('path');
 const axios = require('axios');
 const constants = require('./constants');
+const config = require('./config');
 const useful = require('./useful');
 const LineByLineReader = require('line-by-line');
 const geoip = require('geoip-lite');
@@ -55,10 +56,10 @@ async function downloadServer_log() {
 
 // create connection to database
 const db = mysql.createConnection({
-  host: constants.MYSQL_H,
-  user: constants.MYSQL_U,
-  password: constants.MYSQL_P,
-  database: constants.MYSQL_D,
+  host: config.MYSQL_H,
+  user: config.MYSQL_U,
+  password: config.MYSQL_P,
+  database: config.MYSQL_D,
 });
 // connect to database
 db.connect((err) => {
@@ -141,7 +142,7 @@ function readInfo() {
         }
         try {
           var cSplit = line.split(";");
-          var guid = cSplit[1];
+          var buid = cSplit[1];
           var name = cSplit[3];
           var preLength = 0;
           if (line.startsWith(";")) {
@@ -159,20 +160,20 @@ function readInfo() {
 
           // to ensure no two messages have the same timestamp, increment w/ message array length
           var timeStamp = (Number(moment().format('x')) + Number(messages.length)) + "";
-          var inServerGuids = "";
+          var inServerBuids = "";
           for (var i = 0; i < activePlayers.length; i++) {
-            inServerGuids += activePlayers[i].guid + " ";
+            inServerBuids += activePlayers[i].buid + " ";
           }
-          inServerGuids = inServerGuids.trim();
+          inServerBuids = inServerBuids.trim();
           var hash = useful.md5HashString(line + line2);
           // create message object
           var messageObj = {};
           messageObj.message = message;
-          messageObj.guid = guid;
+          messageObj.buid = buid;
           messageObj.name = name;
           messageObj.occurred = timeStamp;
           messageObj.type = msgType;
-          messageObj.inServer = inServerGuids;
+          messageObj.inServer = inServerBuids;
           messageObj.hash = hash;
           messages.push(messageObj);
           //console.log("messageObj", messageObj)
@@ -182,7 +183,7 @@ function readInfo() {
       }
 
       // player json saving mode and json object detected
-      if (playerInfoJson && line.startsWith("{'guid': '")) {
+      if (playerInfoJson && line.startsWith("{'buid': '")) {
         // preserve newlines, remove non-printable and other non-valid JSON chars, convert ' to "
         var jsonLine = line.replace(/\\n/g, "\\n")
           .replace(/\\'/g, "\\'")
@@ -201,10 +202,10 @@ function readInfo() {
           console.log("ERROR: Cannot Parse Player JSON", jsonLine);
           // add players from old active players to new active players
           for(var i = 0; i < oldActivePlayers.length; i++) {
-            var activeGuid = oldActivePlayers[i].guid;
+            var activeBuid = oldActivePlayers[i].buid;
             var isAlreadyAdded = false;
             for(var j = 0; j < activePlayers.length; j++) {
-              if(activePlayers[j].guid == activeGuid) {
+              if(activePlayers[j].buid == activeBuid) {
                 isAlreadyAdded = true;
                 break;
               }
@@ -316,7 +317,7 @@ function cleanActivePlayersTable(activePlayers) {
     query += " WHERE ";
     for (var i = 0; i < activePlayers.length; i++) {
       var p = activePlayers[i];
-      query += "guid != '" + p.guid + "'";
+      query += "buid != '" + p.buid + "'";
       // if there's another player add AND before their guid
       if ((i + 1) < activePlayers.length) {
         query += " AND ";
@@ -335,10 +336,10 @@ function cleanActivePlayersTable(activePlayers) {
 function updateChatlog(messages) {
   for (var i = 0; i < messages.length; i++) {
     var m = messages[i];
-    var query = "INSERT INTO `chatlog` (`message`, `guid`, `name`, `occurred`, `in_server`, `type`, `hash`)" +
+    var query = "INSERT INTO `chatlog` (`message`, `buid`, `name`, `occurred`, `in_server`, `type`, `hash`)" +
       "VALUES (" +
       db.escape(m.message) + ", '" +
-      m.guid + "', " +
+      m.buid + "', " +
       db.escape(m.name) + ", '" +
       m.occurred + "', '" +
       m.inServer + "', '" +
@@ -359,10 +360,10 @@ function updateChatlog(messages) {
 function updateServerRuns(runs) {
   for (var i = 0; i < runs.length; i++) {
     var r = runs[i];
-    var query = "INSERT INTO `server_runs` (`uniq_id`, `guid`, `name`, `zone`, `time`, `occurred`)" +
+    var query = "INSERT INTO `server_runs` (`uniq_id`, `buid`, `name`, `zone`, `time`, `occurred`)" +
       "VALUES ('" +
       r.uniqId + "', '" +
-      r.guid + "', " +
+      r.buid + "', " +
       db.escape(r.name) + ", '" +
       r.zone + "', '" +
       r.time + "', '" +
@@ -441,18 +442,18 @@ function updateDatabase(p) {
   });
 
   // now add to active players table
-  query = "INSERT INTO `active_players` (`guid`, `zone`, `spec`, `afk`, `spec_guid`)" +
+  query = "INSERT INTO `active_players` (`buid`, `zone`, `spec`, `afk`, `spec_buid`)" +
     "VALUES ('" +
-    p.guid + "', '" +
+    p.buid + "', '" +
     p.zone + "', '" +
     p.spec + "', '" +
     p.afk + "', '" +
-    p.specGuid + "')" +
+    p.specBuid + "')" +
     " ON DUPLICATE KEY UPDATE " +
     "zone=VALUES(zone), " +
     "spec=VALUES(spec), " +
     "afk=VALUES(afk), " +
-    "spec_guid=VALUES(spec_guid)";
+    "spec_buid=VALUES(spec_buid)";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -463,12 +464,12 @@ function updateDatabase(p) {
   });
 
   // now add name to aliases table
-  query = "INSERT INTO `aliases` (`guid`, `name`)" +
+  query = "INSERT INTO `aliases` (`buid`, `name`)" +
     "VALUES ('" +
-    p.guid + "', " +
+    p.buid + "', " +
     db.escape(p.name) + ")" +
     " ON DUPLICATE KEY UPDATE " +
-    "guid=VALUES(guid), " +
+    "buid=VALUES(buid), " +
     "name=VALUES(name)";
 
   db.query(query, (err, result) => {
@@ -484,7 +485,7 @@ function updateDatabase(p) {
 
 function checkBerrySnapshot(p) {
   // get latest snapshots first
-  var query = "SELECT * FROM `berries_snapshot` WHERE guid = '" + p.guid + "' ORDER BY timestamp DESC LIMIT 1";
+  var query = "SELECT * FROM `berries_snapshot` WHERE buid = '" + p.buid + "' ORDER BY timestamp DESC LIMIT 1";
   db.query(query, (err, result) => {
     if (err) {
       console.log("ERROR: Problem querying database for berry snapshots");
@@ -517,9 +518,9 @@ function checkBerrySnapshot(p) {
 
 function addBerrySnapshot(p) {
   // add berries snapshot to berries_snapshot table
-  var query = "INSERT INTO `berries_snapshot` (`guid`, `name`, `berries`, `occurred`)" +
+  var query = "INSERT INTO `berries_snapshot` (`buid`, `name`, `berries`, `occurred`)" +
   "VALUES ('" +
-  p.guid + "', '" +
+  p.buid + "', '" +
   p.name + "', '" +
   p.berries + "', " +
   p.visited + ")";
@@ -544,23 +545,23 @@ function updateRunsDatabase(p) {
 }
 
 function updateRunsDatabaseByZone(p, zone) {
-  var query = "SELECT * FROM `runs` WHERE guid = '" + p.guid + "' AND zone = '" + zone + "' ORDER BY time";
+  var query = "SELECT * FROM `runs` WHERE buid = '" + p.buid + "' AND zone = '" + zone + "' ORDER BY time";
   db.query(query, (err, result) => {
     if (err) {
       console.log("ERROR: Problem querying database for runs");
     }
     if (result.length <= 0) {
       //console.log("No runs found for " + p.name + " in zone: " + zone);
-      addRunToDatabase(p.guid, zone, p[zone], p.visited);
+      addRunToDatabase(p.buid, zone, p[zone], p.visited);
     } else {
       //console.log("Runs for " + p.name + " in zone: " + zone, result);
       // if db run is empty or current run is faster than fastest db run (but not 0 i.e. reset), add to db
       var currentFastest = Number(result[0].time);
       if (currentFastest == 0 && Number(p[zone]) > 0) {
-        removeEmptyRunFromDatabase(p.guid, zone);
-        addRunToDatabase(p.guid, zone, p[zone], p.visited);
+        removeEmptyRunFromDatabase(p.buid, zone);
+        addRunToDatabase(p.buid, zone, p[zone], p.visited);
       } else if (Number(p[zone]) > 0 && Number(p[zone]) < currentFastest) {
-        addRunToDatabase(p.guid, zone, p[zone], p.visited);
+        addRunToDatabase(p.buid, zone, p[zone], p.visited);
       } else {
         //console.log("No need to add run to db");
       }
@@ -576,10 +577,10 @@ function isInt(value) {
   return (x | 0) === x;
 }
 
-function addRunToDatabase(guid, zone, time, occurred) {
-  var query = "INSERT INTO `runs` (`guid`, `zone`, `time`, `occurred`) " +
+function addRunToDatabase(buid, zone, time, occurred) {
+  var query = "INSERT INTO `runs` (`buid`, `zone`, `time`, `occurred`) " +
     "VALUES ('" +
-    guid + "', '" +
+    buid + "', '" +
     zone + "', '" +
     time + "', '" +
     occurred + "')";
@@ -593,8 +594,8 @@ function addRunToDatabase(guid, zone, time, occurred) {
   });
 }
 
-function removeEmptyRunFromDatabase(guid, zone) {
-  var query = "DELETE FROM `runs` WHERE guid = '" + guid + "' AND zone = '" + zone + "' AND time = '" + 0 + "'";
+function removeEmptyRunFromDatabase(buid, zone) {
+  var query = "DELETE FROM `runs` WHERE buid = '" + buid + "' AND zone = '" + zone + "' AND time = '" + 0 + "'";
 
   db.query(query, (err, result) => {
     if (err) {
