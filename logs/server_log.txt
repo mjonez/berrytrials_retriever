@@ -1,0 +1,3 @@
+[playerinfojson]
+{'guid': '00000000aae99ce8e3416a12db3c74d9','name': 'PahEz','berries': '8325','zone': 'N/A','easy': '173000','medium': '29300','hard': '0','slide': '0','extreme': '0','trial': '0','race': '0','gap': '313','items': '3','challenges': '0001000010000000000','runs': '15','timeplayed': '0d 6h 39m','time': '49165600','spec': 'false','specGuid': '','afk': 'false','berry': 'false','vip': 'false'}
+[/playerinfojson]
