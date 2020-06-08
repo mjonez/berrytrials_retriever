@@ -461,7 +461,7 @@ function updateServerRuns(runs) {
 function updateDatabase(p) {
 	//console.log("Player: ", p);
 	// update the player record
-	var query = "INSERT INTO `players` (`buid`, `guid`, `name`, `berries`, `motto`, `gap`, `items`, `challenges`, `runs`, `timeplayed`, `berry`, `vip`, `ip`, `country`, `countrycode`, `city`, `latlong`, `visited`, `easy`, `medium`, `hard`, `insane`, `extreme`, `trial`, `race`, `therun`, `easy_saves_loads`, `easy_epoch`, `easy_splits`, `medium_saves_loads`, `medium_epoch`, `medium_splits`, `hard_saves_loads`, `hard_epoch`, `hard_splits`, `extreme_saves_loads`, `extreme_epoch`, `extreme_splits`, `insane_saves_loads`, `insane_epoch`, `insane_splits`, `trial_epoch`, `trial_splits`, `race_epoch`, `race_splits`, `therun_epoch`, `therun_splits`, `pieces`, `pk_games`, `pk_wins`, `hill_games`, `hill_wins`, `hill_killstreak`, `berry_casino`, `berry_wta_race`, `berry_wta_hill`, `berry_gifted`, `berry_received`, `berry_pk`)" +
+	var query = "INSERT INTO `players` (`buid`, `guid`, `name`, `berries`, `motto`, `gap`, `items`, `challenges`, `runs`, `timeplayed`, `epochtime`, `berry`, `vip`, `ip`, `country`, `countrycode`, `city`, `latlong`, `visited`, `easy`, `medium`, `hard`, `insane`, `extreme`, `trial`, `race`, `therun`, `easy_saves_loads`, `easy_epoch`, `easy_splits`, `medium_saves_loads`, `medium_epoch`, `medium_splits`, `hard_saves_loads`, `hard_epoch`, `hard_splits`, `extreme_saves_loads`, `extreme_epoch`, `extreme_splits`, `insane_saves_loads`, `insane_epoch`, `insane_splits`, `trial_epoch`, `trial_splits`, `race_epoch`, `race_splits`, `therun_epoch`, `therun_splits`, `pieces`, `pk_games`, `pk_wins`, `hill_games`, `hill_wins`, `hill_killstreak`, `berry_casino`, `berry_wta_race`, `berry_wta_hill`, `berry_gifted`, `berry_received`, `berry_pk`)" +
 		"VALUES ('" +
 		p.buid + "', '" +
 		p.guid + "', " +
@@ -473,6 +473,7 @@ function updateDatabase(p) {
 		p.challenges + "', '" +
 		p.runs + "', '" +
 		p.timeplayed + "', '" +
+		p.epochtime + "', '" +
 		p.berry + "', '" +
 		p.vip + "', '" +
 		p.ip + "', '" +
@@ -532,6 +533,7 @@ function updateDatabase(p) {
 		"challenges=VALUES(challenges), " +
 		"runs=VALUES(runs), " +
 		"timeplayed=VALUES(timeplayed), " +
+		"epochtime=VALUES(epochtime), " +
 		"berry=VALUES(berry), " +
 		"vip=VALUES(vip), " +
 		"ip=VALUES(ip), " +

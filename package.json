@@ -4,7 +4,7 @@
   "description": "Retrieves exported plyaer data in JSON format from the berrytrials.me server",
   "main": "server.js",
   "scripts": {
-    "start": "concurrently --kill-others \"node bounce.js\" \"node retriever.js\" \"node server.js\"",
+    "start": "concurrently --kill-others \"node bounce.js\" \"node retriever.js\"",
     "startn": "concurrently --kill-others \"nodemon retriever.js\" \"nodemon server.js\"",
     "sn": "nodemon server.js",
     "rn": "nodemon retriever.js",
