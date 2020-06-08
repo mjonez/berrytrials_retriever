@@ -1,5 +1,3 @@
-const jsonfile = require('jsonfile');
-const lineReader = require('line-reader');
 const fs = require('fs');
 const Path = require('path');
 const axios = require('axios');
@@ -383,11 +381,13 @@ function updateServerRuns(runs) {
 function updateDatabase(p) {
   //console.log("Player: ", p);
   // update the player record
-  var query = "INSERT INTO `players` (`guid`, `name`, `berries`, `gap`, `items`, `challenges`, `runs`, `timeplayed`, `berry`, `vip`, `ip`, `country`, `countrycode`, `city`, `latlong`, `visited`, `easy`, `medium`, `hard`, `slide`, `extreme`, `trial`, `race`)" +
+  var query = "INSERT INTO `players` (`buid`, `guid`, `name`, `berries`, `motto`, `gap`, `items`, `challenges`, `runs`, `timeplayed`, `berry`, `vip`, `ip`, `country`, `countrycode`, `city`, `latlong`, `visited`, `easy`, `medium`, `hard`, `insane`, `extreme`, `trial`, `race`, `therun`, `easy_saves_loads`, `easy_epoch`, `easy_splits`, `medium_saves_loads`, `medium_epoch`, `medium_splits`, `hard_saves_loads`, `hard_epoch`, `hard_splits`, `extreme_saves_loads`, `extreme_epoch`, `extreme_splits`, `insane_saves_loads`, `insane_epoch`, `insane_splits`, `trial_epoch`, `trial_splits`, `race_epoch`, `race_splits`, `therun_epoch`, `therun_splits`, `pieces`, `pk_games`, `pk_wins`, `hill_games`, `hill_wins`, `hill_killstreak`, `berry_casino`, `berry_wta_race`, `berry_wta_hill`, `berry_gifted`, `berry_received`, `berry_pk`)" +
     "VALUES ('" +
+    p.buid + "', '" +
     p.guid + "', " +
     db.escape(p.name) + ", '" +
-    p.berries + "', '" +
+	p.berries + "', " +
+	db.escape(p.motto) + ", '" +
     p.gap + "', '" +
     p.items + "', '" +
     p.challenges + "', '" +
@@ -404,13 +404,49 @@ function updateDatabase(p) {
     p.easy + "', '" +
     p.medium + "', '" +
     p.hard + "', '" +
-    p.slide + "', '" +
+    p.insane + "', '" +
     p.extreme + "', '" +
     p.trial + "', '" +
-    p.race + "')" +
-    " ON DUPLICATE KEY UPDATE " +
+    p.race + "', '" +
+    p.therun + "', '" +
+	p.easy_saves_loads + "', '" +
+	p.easy_epoch + "', '" +
+	p.easy_splits + "', '" +
+	p.medium_saves_loads + "', '" +
+	p.medium_epoch + "', '" +
+	p.medium_splits + "', '" +
+	p.hard_saves_loads + "', '" +
+	p.hard_epoch + "', '" +
+	p.hard_splits + "', '" +
+	p.extreme_saves_loads + "', '" +
+	p.extreme_epoch + "', '" +
+	p.extreme_splits + "', '" +
+	p.insane_saves_loads + "', '" +
+	p.insane_epoch + "', '" +
+	p.insane_splits + "', '" +
+	p.trial_epoch + "', '" +
+	p.trial_splits + "', '" +
+	p.race_epoch + "', '" +
+	p.race_splits + "', '" +
+	p.therun_epoch + "', '" +
+	p.therun_splits + "', '" +
+	p.pieces + "', '" +
+	p.pk_games + "', '" +
+	p.pk_wins + "', '" +
+	p.hill_games + "', '" +
+	p.hill_wins + "', '" +
+	p.hill_killstreak + "', '" +
+	p.berry_casino + "', '" +
+	p.berry_wta_race + "', '" +
+	p.berry_wta_hill + "', '" +
+	p.berry_gifted + "', '" +
+	p.berry_received + "', '" +
+	p.berry_pk + "')" +
+	" ON DUPLICATE KEY UPDATE " +
+	"guid=VALUES(guid), " +
     "name=VALUES(name), " +
     "berries=VALUES(berries), " +
+    "motto=VALUES(motto), " +
     "gap=VALUES(gap), " +
     "items=VALUES(items), " +
     "challenges=VALUES(challenges), " +
@@ -427,10 +463,43 @@ function updateDatabase(p) {
     "easy=VALUES(easy), " +
     "medium=VALUES(medium), " +
     "hard=VALUES(hard), " +
-    "slide=VALUES(slide), " +
+    "insane=VALUES(insane), " +
     "extreme=VALUES(extreme), " +
-    "trial=VALUES(trial), " +
-    "race=VALUES(race)";
+	"trial=VALUES(trial), " +
+	"race=VALUES(race), " +
+	"therun=VALUES(therun), " +
+	"easy_saves_loads=VALUES(easy_saves_loads), " +
+	"easy_epoch=VALUES(easy_epoch), " +
+	"easy_splits=VALUES(easy_splits), " +
+	"medium_saves_loads=VALUES(medium_saves_loads), " +
+	"medium_epoch=VALUES(medium_epoch), " +
+	"medium_splits=VALUES(medium_splits), " +
+	"hard_saves_loads=VALUES(hard_saves_loads), " +
+	"hard_epoch=VALUES(hard_epoch), " +
+	"hard_splits=VALUES(hard_splits), " +
+	"extreme_saves_loads=VALUES(extreme_saves_loads), " +
+	"extreme_epoch=VALUES(extreme_epoch), " +
+	"extreme_splits=VALUES(extreme_splits), " +
+	"insane_saves_loads=VALUES(insane_saves_loads), " +
+	"insane_epoch=VALUES(insane_epoch), " +
+	"insane_splits=VALUES(insane_splits), " +
+	"trial_epoch=VALUES(trial_epoch), " +
+	"trial_splits=VALUES(trial_splits), " +
+	"race_epoch=VALUES(race_epoch), " +
+	"race_splits=VALUES(race_splits), " +
+	"therun_epoch=VALUES(therun_epoch), " +
+	"therun_splits=VALUES(therun_splits), " +
+	"pk_games=VALUES(pk_games), " +
+	"pk_wins=VALUES(pk_wins), " +
+	"hill_games=VALUES(hill_games), " +
+	"hill_wins=VALUES(hill_wins), " +
+	"hill_killstreak=VALUES(hill_killstreak), " +
+	"berry_casino=VALUES(berry_casino), " +
+	"berry_wta_race=VALUES(berry_wta_race), " +
+	"berry_wta_hill=VALUES(berry_wta_hill), " +
+	"berry_gifted=VALUES(berry_gifted), " +
+	"berry_received=VALUES(berry_received), " +
+	"berry_pk=VALUES(berry_pk)";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -538,10 +607,11 @@ function updateRunsDatabase(p) {
   updateRunsDatabaseByZone(p, "easy");
   updateRunsDatabaseByZone(p, "medium");
   updateRunsDatabaseByZone(p, "hard");
-  updateRunsDatabaseByZone(p, "slide");
   updateRunsDatabaseByZone(p, "extreme");
+  updateRunsDatabaseByZone(p, "insane");
   updateRunsDatabaseByZone(p, "trial");
   updateRunsDatabaseByZone(p, "race");
+  updateRunsDatabaseByZone(p, "therun");
 }
 
 function updateRunsDatabaseByZone(p, zone) {

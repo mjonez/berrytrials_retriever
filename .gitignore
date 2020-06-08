@@ -105,3 +105,4 @@ dist
 
 #databse config file
 config.js
+package-lock.json
