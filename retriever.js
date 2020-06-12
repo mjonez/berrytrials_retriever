@@ -574,6 +574,7 @@ function updateDatabase(p) {
 		"race_splits=VALUES(race_splits), " +
 		"therun_epoch=VALUES(therun_epoch), " +
 		"therun_splits=VALUES(therun_splits), " +
+		"pieces=VALUES(pieces), " +
 		"pk_games=VALUES(pk_games), " +
 		"pk_wins=VALUES(pk_wins), " +
 		"hill_games=VALUES(hill_games), " +
@@ -597,14 +598,16 @@ function updateDatabase(p) {
 	});
 
 	// now add to active players table
-	query = "INSERT INTO `active_players` (`buid`, `zone`, `spec`, `afk`, `spec_buid`)" +
+	query = "INSERT INTO `active_players` (`buid`, `name`, `zone`, `spec`, `afk`, `spec_buid`)" +
 		"VALUES ('" +
 		p.buid + "', '" +
+		p.name + "', '" +
 		p.zone + "', '" +
 		p.spec + "', '" +
 		p.afk + "', '" +
 		p.specBuid + "')" +
 		" ON DUPLICATE KEY UPDATE " +
+		"name=VALUES(name), " +
 		"zone=VALUES(zone), " +
 		"spec=VALUES(spec), " +
 		"afk=VALUES(afk), " +
