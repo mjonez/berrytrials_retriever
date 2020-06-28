@@ -71,6 +71,25 @@ async function downloadServerLog() {
 	});
 }
 
+async function downloadBerryLog() {
+	const url = 'http://berrytrials.me:4180/cod4/mods/berry_promod/berry_log.txt';
+	const path = Path.resolve(__dirname, 'logs', 'berry_log.txt');
+	const writer = fs.createWriteStream(path);
+
+	const response = await axios({
+		url,
+		method: 'GET',
+		responseType: 'stream'
+	});
+
+	response.data.pipe(writer);
+
+	return new Promise((resolve, reject) => {
+		writer.on('finish', resolve);
+		writer.on('error', reject);
+	});
+}
+
 // create connection to database
 const db = mysql.createConnection({
 	host: config.MYSQL_H,
@@ -100,6 +119,7 @@ async function downloadLogs() {
 	await downloadEnterleave();
 	await downloadGamesMp();
 	await downloadServerLog();
+	await downloadBerryLog();
 	console.log("Finished downloading log files");
 }
 
@@ -382,8 +402,79 @@ function readInfo() {
 
 				// add runs
 				updateServerRuns(runs);
+
+				// read berry log
+				readBerryLog();
 			});
 		});
+	});
+}
+
+var berryLogFirstLine = "";
+var berryLogSeenLines = 0;
+
+function readBerryLog() {
+	var berryLogs = [];
+	var logHashes = new Set();
+	var lr = new LineByLineReader(constants.BERRY_LOG_PATH);
+	var lineCount = 0;
+	var seenFileBefore = false;
+	console.log("Reading berry_log.txt");
+	lr.on('line', function (line) {
+		lr.pause();
+
+		// first line
+		if(lineCount == 0) {
+			// file has been read before
+			if(line == berryLogFirstLine) {
+				seenFileBefore = true;
+				//console.log("berry_log.txt has been read before");
+			}
+			// first time reading file
+			else {
+				berryLogFirstLine = line;
+				berryLogSeenLines = 0;
+			}
+		}
+		
+		// the line has been read before
+		if(seenFileBefore && lineCount < berryLogSeenLines) {
+			// do nothing
+			//console.log("skipping line: " + lineCount + " (berryLogSeenLines: " + berryLogSeenLines + ")");
+		}
+		// read line
+		else {
+			if(line.startsWith("{'name':")) {
+				// preserve newlines, remove non-printable and other non-valid JSON chars, convert ' to "
+				var jsonLine = line.replace(/\\n/g, "\\n")
+				.replace(/\\'/g, "\\'")
+				.replace(/\\"/g, '\\"')
+				.replace(/\\&/g, "\\&")
+				.replace(/\\r/g, "\\r")
+				.replace(/\\t/g, "\\t")
+				.replace(/\\b/g, "\\b")
+				.replace(/\\f/g, "\\f")
+				.replace(/[\u0000-\u0019]+/g, "")
+				.replace(/'/g, '"');
+				try {
+					var b = JSON.parse(jsonLine);
+					b.hash =  require('crypto').createHash('md5').update(jsonLine).digest("hex");
+					berryLogs.push(b);
+				} catch (e) {
+					console.log("ERROR: Cannot parse berry log JSON", jsonLine);
+				}
+			}
+		}
+		lineCount++;
+		lr.resume();
+	});
+	// finished reading berry_log.txt
+	lr.on('end', function () {
+		berryLogSeenLines = lineCount;
+		// add berryLogs
+		//console.log("logHashes.size: " + logHashes.size);
+		//console.log("updateBerryLog() called");
+		updateBerryLog(berryLogs);
 	});
 }
 
@@ -452,7 +543,36 @@ function updateServerRuns(runs) {
 			if (err) {
 				console.log("ERROR: Cannot insert run into server_runs table", err);
 			} else {
-				//console.log("Message: " + m.hash + " added to database");
+				//console.log("Run: " + r.uniqId + " added to database");
+			}
+		});
+	}
+}
+
+function updateBerryLog(berryLogs) {
+	//console.log("berryLogs.length: " + berryLogs.length);
+	for (var i = 0; i < berryLogs.length; i++) {
+		var b = berryLogs[i];
+		var query = "INSERT INTO `berry_log` (`name`, `start_berries`, `end_berries`, `berries`, `operator`, `info`, `bonus`, `buid`, `epochTime`, `strTime`, `hash`)" +
+			"VALUES (" +
+			db.escape(b.name) + ", '" +
+			b.start_berries + "', '" +
+			b.end_berries + "', '" +
+			b.berries + "', '" +
+			b.operator + "', '" +
+			b.info + "', '" +
+			b.bonus + "', '" +
+			b.buid + "', '" +
+			b.epochTime + "', '" +
+			b.strTime + "', '" +
+			b.hash + "')" +
+			" ON DUPLICATE KEY UPDATE hash=hash";
+
+		db.query(query, (err, result) => {
+			if (err) {
+				console.log("ERROR: Cannot insert berry log into berry_log table", err);
+			} else {
+				//console.log("Berry Log: " + b.hash + " added to database");
 			}
 		});
 	}
